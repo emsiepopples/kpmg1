@@ -17,3 +17,8 @@ lda = gensim.models.ldamodel.LdaModel(corpus=mm, id2word=id2word, num_topics=100
 pdb.set_trace()
 
 lda.print_topics(20)
+
+
+if __name__ == "__main__":
+
+    main()
