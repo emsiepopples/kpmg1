@@ -8,7 +8,8 @@ import nltk
 import enron
 from string import digits
 
-def stemmingListofStrings(textsid):
+def stemmingListofStrings(textsid, stopwords=False):
+
     """
     This function takes a list of tuples (id,text) and returns the text after cleaning, tokenizer and stemming
     :param textsid: list of tuples with raw text (id,text)
@@ -20,9 +21,6 @@ def stemmingListofStrings(textsid):
 
     # Initialize the stemmer snowball
     stem = nltk.stem.snowball.EnglishStemmer()
-
-    #Initialize the stop words
-    stop_words = enron.getCustomStopwords()
 
     # Clean the text eliminating symbols and numbers
     texts = [text.translate(None, digits) for text in texts]
@@ -41,7 +39,13 @@ def stemmingListofStrings(textsid):
 
     # Tokenize the texts and eliminates stopwords and all words with length < 2
     texts_token = [scrub.tokenizeString(text, lower=True, tokenizer="punktword") for text in texts]
-    texts_token = [[x for x in text_token if x not in stop_words and len(x) > 1] for text_token in texts_token]
+
+    if stopwords == True:
+        #Initialize the stop words
+        stop_words = enron.getCustomStopwords()
+        texts_token = [[x for x in text_token if x not in stop_words and len(x) > 1] for text_token in texts_token]
+    elif stopwords == False:
+        texts_token = [[x for x in text_token if len(x) > 1] for text_token in texts_token]
 
     # Apply stemming
     texts_stem = [[stem.stem(word) for word in text_token] for text_token in texts_token]
@@ -51,7 +55,7 @@ def stemmingListofStrings(textsid):
     return textsid
 
 
-def stemmingString(text, id):
+def stemmingString(text, id, stopwords=False):
     """
     This function takes a text and an id and returns the text after cleaning, tokenizer and stemming
     :param text: raw text
@@ -62,8 +66,7 @@ def stemmingString(text, id):
     # Initialize the stemmer snowball
     stem = nltk.stem.snowball.EnglishStemmer()
 
-    #Initialize the stop words
-    stop_words = enron.getCustomStopwords()
+
 
     # Clean the text eliminating symbols and numbers
     text = text.translate(None, digits)
@@ -78,7 +81,12 @@ def stemmingString(text, id):
 
     # Tokenize the texts and eliminates stopwords and all words with length < 2
     text_token = scrub.tokenizeString(text, lower=True, tokenizer="punktword")
-    text_token = [x for x in text_token if x not in stop_words and len(x) > 1]
+    if stopwords == True:
+        #Initialize the stop words
+        stop_words = enron.getCustomStopwords()
+        text_token = [x for x in text_token if x not in stop_words and len(x) > 1]
+    elif stopwords == False:
+        text_token = [x for x in text_token if len(x) > 1]
 
     # Apply stemming
     text_stem = [stem.stem(word) for word in text_token]

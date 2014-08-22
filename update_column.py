@@ -94,8 +94,8 @@ def main():
 
     connection, cursor = enron.connectDB(args.name)
 
-    
-    cursor.execute("select ID from {0} order by id desc limit 1;".format(args.table))
+    cursor.execute("select ID from emails order by id desc limit 1;")
+    #cursor.execute("select ID from {0} order by id desc limit 1;".format(args.table))
     numrows = int(cursor.fetchone()[0])
 
     #loop over number of rows
@@ -107,14 +107,15 @@ def main():
         
         #fetch the rawtext
 
-        cursor.execute("""select rawtext from Emails where id = {0}""".format(id))
+        cursor.execute("select rawtext from emails where id = {0}".format(id))
         rawtext = cursor.fetchone()[0]
 
         cleantext = ultraClean(rawtext)
 
         cleantext_escape = mdb.escape_string(cleantext)
 
-        query = """UPDATE {0} set {1}='{2}' where `id` =  {3};""".format(args.table, args.column, cleantext_escape, id)
+        query = """UPDATE emails set {0}='{1}' where `id` =  {2};""".format(args.column, cleantext_escape, id)
+        #query = """UPDATE {0} set {1}='{2}' where `id` =  {3};""".format(args.table, args.column, cleantext_escape, id)
         
         cursor.execute(query)
         connection.commit()

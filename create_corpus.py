@@ -11,33 +11,57 @@ import stemming as stem
 import enron
 
 
-class MyCorpus():
-    def __iter__(self):
+class MyCorpus(object):
+     def __init__(self, dict_name,size=None):
+        self.dict_name = dict_name
+        self.dictionary=corpora.Dictionary.load_from_text(dict_name)
+        self.connection = mdb.connect('localhost', 'kpmg1', 's2ds', 'enron')
+        self.cur = self.connection.cursor()
+        if size == None:
+            self.cur.execute("select id from emails order by id desc limit 1;")
+            res = self.cur.fetchall()
+            tmp = [int(col) for row in res for col in row]
+            self.size=tmp[0]
+        else:
+            self.size = size
+
+     def __iter__(self):
         try:
-            print "Customizing dictionary..."
-            dictionary=dic.customizeDic(10,30000)
-            connection = mdb.connect('localhost', 'kpmg1', 's2ds', 'enron')
-            cur = connection.cursor()
-            cur.execute("select id from emails order by id desc limit 1;")
-            res = cur.fetchall()
-            size = [int(col) for row in res for col in row]
-            for id in range(1,size[0]):
-                cur.execute(" select text from emails where id = {0} ".format(id))
-                tmp = cur.fetchall()
-                text_stem = stem.stemmingString(tmp[0][0], id)
-                yield dictionary.doc2bow(text_stem, allow_update=False)
+            for id in range(1,self.size):
+                self.cur.execute(" select text from emails where id = {0} ".format(id))
+                tmp = self.cur.fetchall()
+                text_stem = stem.stemmingString(tmp[0][0], id, stopwords=False)
+                yield self.dictionary.doc2bow(text_stem, allow_update=False)
         finally:
-            connection.close()
+            self.connection.close()
+
+
+parser = argparse.ArgumentParser(description="Generating a corpus")
+parser.add_argument("--raw", help="Use raw dictionary (don't apply customization)",default=False, action='store_true')
+parser.add_argument("--stopwords", help="Add stopwords",default=False, action='store_true')
+parser.add_argument("--minfreq", help="Create a dictionary using the whole set of emails",default=0,required = False, type=int)
+parser.add_argument('--maxfreq', help = 'Number of emails used to build the dictionary',
+                    default=300000,required = False, type=int)
 
 def main():
 
-    outfile = open('corpus.txt', 'w')
+    args = parser.parse_args()
+    min=args.minfreq
+    max=args.maxfreq
+    stopws=args.stopwords
+    raw=args.raw
 
-    print "Creating corpus..."
-
-    corpus=MyCorpus()
-
-    corpora.mmcorpus.MmCorpus.serialize('corpus.mm', corpus)
+    if raw == True:
+        print "Creating corpus..."
+        corpus=MyCorpus("dictionary_freq.txt")
+        corpora.mmcorpus.MmCorpus.serialize('corpus.mm', corpus)
+    elif raw == False:
+        print "Customizing dictionary..."
+        dic.customizeDic(min,max,stopwords=stopws)
+        print "Creating corpus..."
+        corpus=MyCorpus("new_dic_freq.txt")
+        filename="corpus_min{0}_max{1}_stopwds{2}.mm".format(min,max,stopws)
+        corpora.mmcorpus.MmCorpus.serialize(filename, corpus)
 
     return corpus
 

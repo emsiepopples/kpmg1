@@ -16,7 +16,6 @@ import enron
 parser = argparse.ArgumentParser("Create database from email files")
 parser.add_argument("startdir", type = str, help='Starting place for directory tree')
 
-
 def createDB():
 
     """Creates connection to mysql and creates the DB in standard form"""
@@ -94,8 +93,6 @@ def createDB():
 
     return
 
-
-
 def formatDate(datestring):
 
     #this is probably specific to this email system I don't know
@@ -114,8 +111,6 @@ def formatDate(datestring):
 
     formatdate = datetime.datetime.strftime(dateobj, '%Y-%m-%d %H:%M:%S')
     return formatdate
-
-
 
 def addDBEntry(connect,cur, tablename, email, filepath):
 
@@ -217,10 +212,6 @@ def addDBEntry(connect,cur, tablename, email, filepath):
 
     logfile.close()
     return
-
-
-
-
 
 def main():
  

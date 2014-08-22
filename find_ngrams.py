@@ -5,7 +5,7 @@ This function computes the ngrams of a random sample of emails from the database
 a/two file/s with the results (bigrams.txt and/or trigrams.txt)
 
 Usage:
-python collocations --sample 0.5 --min_freq 1000 --max_ngrams 1000 --word_len 3
+python collocations --sample 0.5 --min_freq 1000 --max_ngrams 100 --word_len 3
 """
 import logging
 
